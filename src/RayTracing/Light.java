@@ -1,6 +1,9 @@
 package RayTracing;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Light {
 	
@@ -41,6 +44,26 @@ public class Light {
 		}
 		return new Light(position, color, specularIntensity, shadowIntensity, lightRadius);
 		
+	}
+	
+	public List<Ray> getLightsRayToPoint(Vector p, int shadowRaysCount) {
+		Ray ray = Ray.create(getPosition(), p);
+		
+		if (shadowRaysCount == 1) {
+			return Arrays.asList(ray);
+		}
+		
+		Square square = new Square(ray, getLightRadius());
+		
+		List<Vector> gridPoints = square.randomizedGridPoints(shadowRaysCount);
+		
+		List<Ray> retVal = new ArrayList<Ray>();
+		
+		for (Vector gridPoint : gridPoints) {
+			retVal.add(new Ray(gridPoint, p.sub(gridPoint).normalize()));
+		}
+		
+		return retVal;
 	}
 	
 	public Vector getPosition() {

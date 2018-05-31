@@ -10,6 +10,10 @@ public class Ray {
 		this.p0 = p0;
 		this.direction = direction;
 	}
+	
+	public static Ray create(Vector fromPoint, Vector toPoint) {
+		return new Ray(fromPoint, toPoint.sub(fromPoint).normalize());
+	}
 
 	public Vector getP0() {
 		return p0;
@@ -22,6 +26,10 @@ public class Ray {
 	@Override
 	public String toString() {
 		return String.format("[Ray - p0 : %s , direction : %s] ", p0.toString(), direction.toString());
+	}
+	
+	public Vector pointForT(double t) {
+		return getP0().add(getDirection().multiply(t));
 	}
 	
 	

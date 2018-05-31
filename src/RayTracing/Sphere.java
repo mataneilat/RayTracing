@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class Sphere implements SceneObject {
+public class Sphere implements Primitive {
 	
 	private final Vector center;
 	
@@ -63,6 +63,12 @@ public class Sphere implements SceneObject {
 		double thc = Math.sqrt(r_square - d_square);
 		return Arrays.asList(tca - thc, tca + thc);
 	}
+
+	@Override
+	public Vector surfaceNormalAtPoint(Vector p) {
+		return p.sub(getCenter()).normalize();
+	}
+	
 	
 	
 

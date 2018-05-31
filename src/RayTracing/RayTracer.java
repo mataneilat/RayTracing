@@ -84,7 +84,7 @@ public class RayTracer {
         
         List<Light> lights = new ArrayList<Light>();
         List<Material> materials = new ArrayList<Material>();
-        List<SceneObject> sceneObjects = new ArrayList<SceneObject>();
+        List<Primitive> primitives = new ArrayList<Primitive>();
         
         
         while ((line = r.readLine()) != null) {
@@ -109,10 +109,10 @@ public class RayTracer {
                     materials.add(Material.parse(params));
                     System.out.println(String.format("Parsed material (line %d)", lineNum));
                 } else if (code.equals("sph")) {
-                    sceneObjects.add(Sphere.parse(params));
+                    primitives.add(Sphere.parse(params));
                     System.out.println(String.format("Parsed sphere (line %d)", lineNum));
                 } else if (code.equals("pln")) {
-                    sceneObjects.add(Plane.parse(params));
+                    primitives.add(Plane.parse(params));
                     System.out.println(String.format("Parsed plane (line %d)", lineNum));
                 }
                 else if (code.equals("lgt")) {
@@ -124,14 +124,12 @@ public class RayTracer {
                 }
             }
         }
-        
-        System.out.println(sceneObjects);
  
-        if (camera == null || settings == null || materials.isEmpty() || lights.isEmpty() || sceneObjects.isEmpty()) {
+        if (camera == null || settings == null || materials.isEmpty() || lights.isEmpty() || primitives.isEmpty()) {
         	throw new RayTracingParseException("Did not parse all of the required scene parameters");
         }
         System.out.println("Finished parsing scene file " + sceneFileName);
-        return new Scene(camera, settings, materials, lights, sceneObjects);
+        return new Scene(camera, settings, materials, lights, primitives);
     }
  
     /**
@@ -149,16 +147,10 @@ public class RayTracer {
         
         for (int i = 0; i < imageWidth; i++) {
         	for (int j = 0; j < imageHeight; j++) {
-        		Ray ray = scene.getCamera().constructRayThroughPixel(i, j);
-        		Intersection intersection = findItersection(ray, scene);
         		
-        		Color c = null;
-        		if (intersection == null) {
-        			c = scene.getSettings().getBackgroundColor();
-        		} else {
-        			int mIdx = intersection.getPrimitive().getMaterialIndex();
-            		c = scene.getMaterials().get(mIdx-1).getDiffuseColor();
-        		}
+        		Ray ray = scene.getCamera().constructRayThroughPixel(i, j);
+        		Color c = scene.calculateColor(ray);
+        		
         		rgbData[(j * this.imageWidth + i) * 3] = (byte)(c.getRed() & 0xFF);
         		rgbData[(j * this.imageWidth + i) * 3 + 1] = (byte)(c.getGreen() & 0xFF);
         		rgbData[(j * this.imageWidth + i) * 3 + 2] = (byte)(c.getBlue() & 0xFF);
@@ -186,32 +178,6 @@ public class RayTracer {
  
         System.out.println("Saved file " + outputFileName);
  
-    }
- 
- 
-    private static Intersection findItersection(Ray ray, Scene scene) {
-    	double minT = Double.MAX_VALUE;
-    	SceneObject minPrimitive = null;
-    	for (SceneObject primitive : scene.getSceneObjects()) {
-    		List<Double> intersections = primitive.intersect(ray);
-    		if (intersections == null) {
-    			continue;
-    		}
-    		for (Double t : intersections) {
-    			if (t <= 0) {
-    				continue;
-    			}
-    			if (t < minT) {
-        			minT = t;
-        			minPrimitive = primitive;
-        		}
-    		}
-    		
-    	}
-    	if (minT == Double.MAX_VALUE) {
-    		return null;
-    	} 
-    	return new Intersection(minT, minPrimitive);
     }
  
  

@@ -109,7 +109,7 @@ public class Camera {
 		}
 		Vector p = screenTopRight().add(getLeftDirection().multiply((double)i * getScreenWidth() / (double) imageContext.getImageWidth()));
 		p = p.add(getDownDirection().multiply((double)j * getScreenHeight() / (double) imageContext.getImageHeight()));
-		return new Ray(getPosition(), p.sub(getPosition()).normalize());
+		return Ray.create(getPosition(), p);
 	}
 	
 	public Vector getPosition() {

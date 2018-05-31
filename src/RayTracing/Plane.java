@@ -3,7 +3,7 @@ package RayTracing;
 import java.util.Arrays;
 import java.util.List;
 
-public class Plane implements SceneObject {
+public class Plane implements Primitive {
 	
 	private final Vector normal;
 	
@@ -49,6 +49,11 @@ public class Plane implements SceneObject {
 	@Override
 	public List<Double> intersect(Ray ray) {
 		return Arrays.asList(-(ray.getP0().dot(getNormal()) - getOffset()) / (double) ray.getDirection().dot(getNormal()));
+	}
+
+	@Override
+	public Vector surfaceNormalAtPoint(Vector p) {
+		return getNormal();
 	}
 	
 	

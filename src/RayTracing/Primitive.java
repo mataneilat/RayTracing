@@ -2,10 +2,12 @@ package RayTracing;
 
 import java.util.List;
 
-public interface SceneObject {
+public interface Primitive {
 	
 	public int getMaterialIndex();
 	
 	public List<Double> intersect(Ray ray);
+	
+	public Vector surfaceNormalAtPoint(Vector p);
 
 }
