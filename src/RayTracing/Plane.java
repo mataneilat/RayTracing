@@ -3,37 +3,25 @@ package RayTracing;
 import java.util.Arrays;
 import java.util.List;
 
-public class Plane implements Primitive {
+public class Plane {
 	
 	private final Vector normal;
 	
 	private final double offset;
-	
-	private final int materialIndex;
 
-	private Plane(Vector normal, double offset, int materialIndex) {
+	public Plane(Vector normal, double offset) {
 		this.normal = normal;
 		this.offset = offset;
-		this.materialIndex = materialIndex;
 	}
 	
-	public static Plane parse(String... params) throws RayTracingParseException {
-		if (params.length != 5) {
-			throw new RayTracingParseException("Wrong number of parameters");
-		}
-		Vector normal;
-		double offset;
-		int materialIndex;
-		try {
-			normal = Vector.parse(params[0], params[1], params[2]);
-			offset = Double.parseDouble(params[3]);
-			materialIndex = Integer.parseInt(params[4]);
-		} catch (NumberFormatException e) {
-			throw new RayTracingParseException(e);
-		}
-		return new Plane(normal, offset, materialIndex);
+	public static Plane create(Vector p1, Vector p2, Vector p3) {
+		Vector v1 = Vector.createDirection(p1, p2);
+		Vector v2 = Vector.createDirection(p1, p3);
+		Vector normal = v1.cross(v2).normalize();
+		return new Plane(normal, p1.dot(normal));
+		
 	}
-
+	
 	public Vector getNormal() {
 		return normal;
 	}
@@ -42,21 +30,13 @@ public class Plane implements Primitive {
 		return offset;
 	}
 
-	public int getMaterialIndex() {
-		return materialIndex;
-	}
-
-	@Override
 	public List<Double> intersect(Ray ray) {
 		return Arrays.asList(-(ray.getP0().dot(getNormal()) - getOffset()) / (double) ray.getDirection().dot(getNormal()));
 	}
 
-	@Override
 	public Vector surfaceNormalAtPoint(Vector p) {
 		return getNormal();
-	}
-	
-	
+	}	
 	
 
 }

@@ -42,7 +42,7 @@ public class RayTracer {
            // String sceneFileName = args[0];
            // String outputFileName = args[1];
  
-            String sceneFileName = "/tmp/scenes2017/Transparency.txt";
+            String sceneFileName = "/tmp/scenes2017/Triangle.txt";
             String outputFileName = "/tmp/ray_out.png";
             
             if (args.length > 3)
@@ -112,8 +112,10 @@ public class RayTracer {
                     primitives.add(Sphere.parse(params));
                     System.out.println(String.format("Parsed sphere (line %d)", lineNum));
                 } else if (code.equals("pln")) {
-                    primitives.add(Plane.parse(params));
+                    primitives.add(PlanePrimitive.parse(params));
                     System.out.println(String.format("Parsed plane (line %d)", lineNum));
+                } else if (code.equals("trg")) {
+                	primitives.add(Triangle.parse(params));
                 }
                 else if (code.equals("lgt")) {
                     lights.add(Light.parse(params));

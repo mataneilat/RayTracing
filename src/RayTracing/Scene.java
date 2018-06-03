@@ -77,24 +77,25 @@ public class Scene {
 			
 			for (Light light: getLights()) {
 				
-				Color diffuseColor = calculateDiffuseColor(primitive, intersectionPoint, light);
-				
-				diffuseColor = ColorUtils.multiplyComponents(diffuseColor, light.getColor());
-				
-				Color specularColor = calculateSpecularColor(primitive, reflectionRay.getDirection(), intersectionPoint, light);
-				
-				Color lightSpecularColor = ColorUtils.multiplyComponents(light.getColor(), (float)light.getSpecularIntensity());
-				
-				specularColor = ColorUtils.multiplyComponents(specularColor, lightSpecularColor);
-				
-				Color lightContribution = ColorUtils.add(diffuseColor, specularColor);
-				
+
 				float illuminationFactor = (float) hittingRaysRatio(light, intersectionPoint);
-	
+				
 	//			if (illuminationFactor == 0) {
 	//				illuminationFactor = (float) ((float) 1.0 - light.getShadowIntensity());
 	//			}
 				illuminationFactor = illuminationFactor + (1 - illuminationFactor) * (float) (1 - light.getShadowIntensity());
+				
+				if (illuminationFactor == 0) {
+					continue;
+				}
+				
+				// TODO: CALCULATE ILLUMINATION FIRST
+				Color diffuseColor = calculateDiffuseColor(primitive, intersectionPoint, light);
+				
+				// TODO: FIGURE WHY MULTIPLYING TWICE LIGHT COLOR
+				Color specularColor = calculateSpecularColor(primitive, reflectionRay.getDirection(), intersectionPoint, light);
+				
+				Color lightContribution = ColorUtils.add(diffuseColor, specularColor);
 				
 				lightContribution = ColorUtils.multiplyComponents(lightContribution, illuminationFactor);
 				
@@ -139,8 +140,10 @@ public class Scene {
 		
 		float specular = (float) lightRay.getDirection().multiply(-1).dot(reflectionRayDirection);
 		if (specular > 0) {
-			Color c = ColorUtils.multiplyComponents(primitiveMaterial.getSpecularColor(), light.getColor());
-			return ColorUtils.multiplyComponents(c, (float) Math.pow(specular, primitiveMaterial.getSpecularityCoefficient()));
+			Color lightSpecularColor = ColorUtils.multiplyComponents(light.getColor(), (float)light.getSpecularIntensity());
+			Color c = ColorUtils.multiplyComponents(primitiveMaterial.getSpecularColor(), lightSpecularColor);
+			return ColorUtils.multiplyComponents(c, (float) Math.pow(specular, 
+					primitiveMaterial.getSpecularityCoefficient()));
 		}
 		return Color.BLACK;
 	}

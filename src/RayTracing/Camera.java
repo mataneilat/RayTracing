@@ -94,6 +94,7 @@ public class Camera {
 	}
 	
 	public Vector screenTopRight() {
+		// TODO: FIX UP VECTOR, AND MAKE LAZY
 		Vector topRight = getPosition().add(getTowardsDirection().multiply(getScreenDistance()));
 		topRight = topRight.add(getUpVector().multiply((double)getScreenHeight() / 2.0));
 		return topRight.add(getRightDirection().multiply((double)getScreenWidth() / 2.0));

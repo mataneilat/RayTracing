@@ -8,6 +8,10 @@ public class Vector {
 		this.z = z;
 	}
 	
+	public static Vector createDirection(Vector from, Vector to) {
+		return to.sub(from).normalize();
+	}
+	
 	public double getX() {
 		return x;
 	}
@@ -60,7 +64,7 @@ public class Vector {
 	}
 	
 	public Vector cross(Vector v) {
-		return new Vector(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.z);	
+		return new Vector(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);	
 	}
 	
 	public double norm() {
