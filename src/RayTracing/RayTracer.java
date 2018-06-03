@@ -116,8 +116,7 @@ public class RayTracer {
                     System.out.println(String.format("Parsed plane (line %d)", lineNum));
                 } else if (code.equals("trg")) {
                 	primitives.add(Triangle.parse(params));
-                }
-                else if (code.equals("lgt")) {
+                } else if (code.equals("lgt")) {
                     lights.add(Light.parse(params));
                     System.out.println(String.format("Parsed light (line %d)", lineNum));
                 }
@@ -150,12 +149,17 @@ public class RayTracer {
         for (int i = 0; i < imageWidth; i++) {
         	for (int j = 0; j < imageHeight; j++) {
         		
-        		Ray ray = scene.getCamera().constructRayThroughPixel(i, j);
-        		Color c = scene.calculateColor(ray);
+        		List<Ray> rays = scene.getCamera().constructRayThroughPixel(i, j);
+        		Color pixelColor = Color.BLACK;
+        		for (Ray ray : rays) {
+        			Color tracedColor = scene.calculateColor(ray);
+        			pixelColor = ColorUtils.add(pixelColor, ColorUtils.multiplyComponents(tracedColor, 1.0f / (float) rays.size()));
+        		}
         		
-        		rgbData[(j * this.imageWidth + i) * 3] = (byte)(c.getRed() & 0xFF);
-        		rgbData[(j * this.imageWidth + i) * 3 + 1] = (byte)(c.getGreen() & 0xFF);
-        		rgbData[(j * this.imageWidth + i) * 3 + 2] = (byte)(c.getBlue() & 0xFF);
+        		
+        		rgbData[(j * this.imageWidth + i) * 3] = (byte)(pixelColor.getRed() & 0xFF);
+        		rgbData[(j * this.imageWidth + i) * 3 + 1] = (byte)(pixelColor.getGreen() & 0xFF);
+        		rgbData[(j * this.imageWidth + i) * 3 + 2] = (byte)(pixelColor.getBlue() & 0xFF);
         	}
         }
                 // Put your ray tracing code here!

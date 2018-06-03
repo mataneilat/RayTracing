@@ -47,6 +47,10 @@ public class Scene {
 	}
 
 	
+	public List<Ray> constructRaysThroughPixel(int i, int j) {
+		return getCamera().constructRaysThroughPixel(i, j, getSettings().getSuperSamplingLevel());
+	}
+	
 	public Color calculateColor(Ray viewRay) {
 		return calculateColor(viewRay, getSettings().getMaxRecursionLevel(), Color.WHITE);
 	}

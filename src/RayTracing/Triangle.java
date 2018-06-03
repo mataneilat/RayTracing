@@ -88,19 +88,6 @@ public class Triangle implements Primitive {
 		Vector cp2 = ab.cross(p2.sub(a));
 		return (cp1.dot(cp2) >= 0);
 	}
-	
-//	private boolean isPointInside(Vector point) {
-//		Vector AB = getV2().sub(getV1());
-//		Vector AC = getV3().sub(getV1());
-//		Vector PA = getV1().sub(point);
-//		Vector PB = getV2().sub(point);
-//		Vector PC = getV3().sub(point);
-//		double triangleArea = AB.cross(AC).norm() / 2.0;
-//		double alpha = PB.cross(PC).norm() / (2.0 * triangleArea);
-//		double beta = PC.cross(PA).norm() / (2.0 * triangleArea);
-//		double gamma = 1.0 - alpha - beta;
-//		return alpha >= 0 && alpha <= 1 && beta >= 0 && beta <= 1 && gamma >= 0 && gamma <= 1;
-//	}
 
 	@Override
 	public Vector surfaceNormalAtPoint(Vector p) {
