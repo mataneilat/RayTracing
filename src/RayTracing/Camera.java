@@ -48,9 +48,15 @@ public class Camera {
 	
 	private ImageContext imageContext = null;
 	
-	private double screenHeight;
+	private Vector screenTopRight = null;
 	
-	private Vector upVector;
+	private Vector upVector = null;
+	
+	private Vector leftDirection = null;
+	
+	private Vector downDirection = null;
+	
+	private Vector rightDirection;
 
 	private Camera(Vector position, Vector lookAtPoint, Vector rawUpVector,
 			double screenDistance, double screenWidth) {
@@ -89,30 +95,37 @@ public class Camera {
 	}
 	
 	public Vector getRightDirection() {
-		return getTowardsDirection().cross(getUpVector()).normalize();
+		if (rightDirection == null) {
+			rightDirection = getTowardsDirection().cross(getUpVector()).normalize();
+		}
+		return rightDirection;
 	}
 	
 	public Vector getLeftDirection() {
-		return getRightDirection().multiply(-1);
+		if (leftDirection == null) {
+			leftDirection = getRightDirection().multiply(-1);
+		}
+		return leftDirection;
 	}
 	
 	public Vector getDownDirection() {
-		return getUpVector().multiply(-1);
+		if (downDirection == null) {
+			downDirection = getUpVector().multiply(-1);
+		}
+		return downDirection;
 	}
 	
 	public Vector screenTopRight() {
-		// TODO: NMAKE LAZY?
-		Vector topRight = getPosition().add(getTowardsDirection().multiply(getScreenDistance()));
-		topRight = topRight.add(getUpVector().multiply((double)getScreenHeight() / 2.0));
-		return topRight.add(getRightDirection().multiply((double)getScreenWidth() / 2.0));
+		if (screenTopRight == null) {
+			Vector topRight = getPosition().add(getTowardsDirection().multiply(getScreenDistance()));
+			topRight = topRight.add(getUpVector().multiply((double)getScreenHeight() / 2.0));
+			screenTopRight = topRight.add(getRightDirection().multiply((double)getScreenWidth() / 2.0));
+		}
+		return screenTopRight;
 	}
 	
 	public void setImageContext(int imageWidth, int imageHeight) {
 		imageContext = new ImageContext(imageWidth, imageHeight);
-	}
-	
-	public List<Ray> constructRayThroughPixel(int i, int j) {
-		return constructRaysThroughPixel(i, j, 1);
 	}
 	
 	public List<Ray> constructRaysThroughPixel(int i, int j, int superSampling) {
@@ -132,8 +145,8 @@ public class Camera {
 		List<Ray> retVal = new ArrayList<Ray>();
 		Random rand = new Random();
 		
-		double superMaxDeltaX = deltaX / superSampling;
-		double superMaxDeltaY = deltaY / superSampling;
+		double superMaxDeltaX = deltaX / (double)superSampling;
+		double superMaxDeltaY = deltaY / (double)superSampling;
 		
 		
 		for (int x = 0; x < superSampling; x++) {
@@ -143,8 +156,8 @@ public class Camera {
 				double superDeltaX = rand.nextDouble() * superMaxDeltaX;
 				double superDeltaY = rand.nextDouble() * superMaxDeltaY;
 				
-				p = p.add(getLeftDirection().multiply((double)(i + (double)x / superSampling) * deltaX + superDeltaX));
-				p = p.add(getDownDirection().multiply((double)(j + (double)y / superSampling) * deltaY + superDeltaY));
+				p = p.add(getLeftDirection().multiply((double)(i + (double)x / (double)superSampling) * deltaX + superDeltaX));
+				p = p.add(getDownDirection().multiply((double)(j + (double)y / (double)superSampling) * deltaY + superDeltaY));
 				
 				retVal.add(Ray.create(getPosition(), p));
 			}

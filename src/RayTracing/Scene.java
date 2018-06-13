@@ -47,6 +47,26 @@ public class Scene {
 	}
 
 	
+	public void setImageContext(int imageWidth, int imageHeight) {
+		getCamera().setImageContext(imageWidth, imageHeight);
+	}
+	
+	public Color calculateColorForPixel(int i, int j) {
+		
+		List<Ray> rays = constructRaysThroughPixel(i, j);
+		float r = 0;
+		float g = 0;
+		float b = 0;
+		for (Ray ray : rays) {
+			Color tracedColor = calculateColor(ray);
+			r += tracedColor.getRed();
+			g += tracedColor.getGreen();
+			b += tracedColor.getBlue();
+		}
+		float divisor = (float)rays.size() * 255.0f;
+		return new Color(r / divisor, g / divisor, b / divisor);
+	}
+	
 	public List<Ray> constructRaysThroughPixel(int i, int j) {
 		return getCamera().constructRaysThroughPixel(i, j, getSettings().getSuperSamplingLevel());
 	}
@@ -69,13 +89,17 @@ public class Scene {
 			
 			Primitive primitive = intersection.getPrimitive();
 			
-			if (ColorUtils.colorDifference(contribution, Color.BLACK) <= 0.01) {
+			if (ColorUtils.colorDifference(contribution, Color.BLACK) <= 0.05) {
 				return getPrimitiveMaterial(primitive).getDiffuseColor();
 			}
 			
 			Vector intersectionPoint = intersection.getIntersectionPoint();
 			
-			Ray reflectionRay = calculateReflectionRay(primitive, viewRay.getDirection(), intersectionPoint);
+			Vector surfaceNormal = primitive.getPrimitiveLogic().surfaceNormalAtPoint(intersectionPoint);
+			
+			surfaceNormal = surfaceNormal.dot(viewRay.getDirection().multiply(-1)) > 0 ? surfaceNormal : surfaceNormal.multiply(-1);
+			
+			Ray reflectionRay = calculateReflectionRay(primitive, surfaceNormal, viewRay.getDirection(), intersectionPoint);
 			
 			Color color = Color.BLACK;
 			
@@ -93,10 +117,8 @@ public class Scene {
 					continue;
 				}
 				
-				// TODO: CALCULATE ILLUMINATION FIRST
-				Color diffuseColor = calculateDiffuseColor(primitive, intersectionPoint, light);
+				Color diffuseColor = calculateDiffuseColor(primitive, surfaceNormal, intersectionPoint, light);
 				
-				// TODO: FIGURE WHY MULTIPLYING TWICE LIGHT COLOR
 				Color specularColor = calculateSpecularColor(primitive, reflectionRay.getDirection(), intersectionPoint, light);
 				
 				Color lightContribution = ColorUtils.add(diffuseColor, specularColor);
@@ -152,8 +174,7 @@ public class Scene {
 		return Color.BLACK;
 	}
 	
-	private Ray calculateReflectionRay(Primitive primitive, Vector rayDirection, Vector intersectionPoint) {
-		Vector surfaceNormal = primitive.surfaceNormalAtPoint(intersectionPoint);
+	private Ray calculateReflectionRay(Primitive primitive, Vector surfaceNormal, Vector rayDirection, Vector intersectionPoint) {
 		double k = -2.0 * rayDirection.dot(surfaceNormal);
 		Vector reflectionDirection = new Vector(k * surfaceNormal.getX() + rayDirection.getX(),
 												k * surfaceNormal.getY() + rayDirection.getY(),
@@ -161,16 +182,17 @@ public class Scene {
 		return new Ray(intersectionPoint, reflectionDirection.normalize());
 	}
 	
-	private Color calculateDiffuseColor(Primitive primitive, Vector intersectionPoint, Light light) {
+	private Color calculateDiffuseColor(Primitive primitive, Vector surfaceNormal, 
+			Vector intersectionPoint, Light light) {
 		Material primitiveMaterial = getPrimitiveMaterial(primitive);
 		Ray lightRay = Ray.create(light.getPosition(), intersectionPoint);
 		
-		float diffuse = (float) lightRay.getDirection().multiply(-1).dot(primitive.surfaceNormalAtPoint(intersectionPoint));
-		if (diffuse > 0) {
-			Color c = ColorUtils.multiplyComponents(primitiveMaterial.getDiffuseColor(), light.getColor());
-			return ColorUtils.multiplyComponents(c, diffuse);
+		float diffuse = (float) lightRay.getDirection().multiply(-1).dot(surfaceNormal);
+		if (diffuse <= 0) {
+			return Color.BLACK;
 		}
-		return Color.BLACK;
+		Color c = ColorUtils.multiplyComponents(primitiveMaterial.getDiffuseColor(), light.getColor());
+		return ColorUtils.multiplyComponents(c, diffuse);
 	}
 	
 	private double hittingRaysRatio(Light light, Vector point) {
@@ -203,7 +225,7 @@ public class Scene {
     	Primitive minPrimitive = null;
     	
     	for (Primitive primitive : getPrimitives()) {
-    		List<Double> intersections = primitive.intersect(ray);
+    		List<Double> intersections = primitive.getPrimitiveLogic().intersect(ray);
     		if (intersections == null) {
     			continue;
     		}

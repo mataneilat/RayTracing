@@ -3,7 +3,7 @@ package RayTracing;
 import java.util.Arrays;
 import java.util.List;
 
-public class Plane {
+public class Plane implements PrimitiveLogic {
 	
 	private final Vector normal;
 	
@@ -12,6 +12,21 @@ public class Plane {
 	public Plane(Vector normal, double offset) {
 		this.normal = normal;
 		this.offset = offset;
+	}
+	
+	public static Plane parse(String... params) throws RayTracingParseException {
+		if (params.length < 4) {
+			throw new RayTracingParseException("Wrong number of parameters");
+		}
+		Vector normal;
+		double offset;
+		try {
+			normal = Vector.parse(params[0], params[1], params[2]);
+			offset = Double.parseDouble(params[3]);
+		} catch (NumberFormatException e) {
+			throw new RayTracingParseException(e);
+		}
+		return new Plane(normal, offset);
 	}
 	
 	public static Plane create(Vector p1, Vector p2, Vector p3) {

@@ -23,6 +23,14 @@ public class Ray {
 		return direction;
 	}
 	
+	public Ray transform(Rotation rotation, Translation translation) {
+		Matrix rotationMatrix = rotation.createHomogeneousMatrix();
+		Matrix translationMatrix = translation.createHomogeneousMatrix();
+		
+		return new Ray(rotationMatrix.multiply(translationMatrix).homogeneousMultiply(getP0()),
+				rotationMatrix.homogeneousMultiply(getDirection()));
+	}
+	
 	@Override
 	public String toString() {
 		return String.format("[Ray - p0 : %s , direction : %s] ", p0.toString(), direction.toString());

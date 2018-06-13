@@ -79,7 +79,22 @@ public class Vector {
 	public String toString() {
 		return String.format("[Vector - x: %f , y: %f, z: %f]", x, y, z);
 	}
+	
+	public static Vector fromArray(double[] arr) {
+		if (arr.length != 3) {
+			return null;
+		}
+		return new Vector(arr[0], arr[1], arr[2]);
+	}
 
+	public double[] asArray() {
+		double[] retVal = new double[3];
+		retVal[0] = getX();
+		retVal[1] = getY();
+		retVal[2] = getZ();
+		return retVal;
+	}
+	
 	private final double x;
 	
 	private final double y;

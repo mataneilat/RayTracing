@@ -3,7 +3,7 @@ package RayTracing;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Triangle implements Primitive {
+public class Triangle implements PrimitiveLogic {
 
 	private final Vector v1;
 	
@@ -11,15 +11,12 @@ public class Triangle implements Primitive {
 	
 	private final Vector v3;
 	
-	private final int materialIndex;
-	
 	private Plane trianglePlane;
 	
-	public Triangle(Vector v1, Vector v2, Vector v3, int materialIndex) {
+	public Triangle(Vector v1, Vector v2, Vector v3) {
 		this.v1 = v1;
 		this.v2 = v2;
 		this.v3 = v3;
-		this.materialIndex = materialIndex;
 	}
 	
 	public Vector getV1() {
@@ -41,26 +38,14 @@ public class Triangle implements Primitive {
 		return trianglePlane;
 	}
 
-	@Override
-	public int getMaterialIndex() {
-		return materialIndex;
-	}
-
 	public static Triangle parse(String... params) throws RayTracingParseException {
-		if (params.length != 10) {
+		if (params.length < 9) {
 			throw new RayTracingParseException("Wrong number of parameters");
 		}
-		Vector v1, v2, v3;
-		int materialIndex;
-		try {
-			v1 = Vector.parse(params[0], params[1], params[2]);
-			v2 = Vector.parse(params[3], params[4], params[5]);
-			v3 = Vector.parse(params[6], params[7], params[8]);
-			materialIndex = Integer.parseInt(params[9]);
-		} catch (NumberFormatException e) {
-			throw new RayTracingParseException(e);
-		}
-		return new Triangle(v1, v2, v3, materialIndex);
+		Vector v1 = Vector.parse(params[0], params[1], params[2]);
+		Vector v2 = Vector.parse(params[3], params[4], params[5]);
+		Vector v3 = Vector.parse(params[6], params[7], params[8]);
+		return new Triangle(v1, v2, v3);
 	}
 
 	@Override

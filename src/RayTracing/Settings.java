@@ -21,7 +21,7 @@ public class Settings {
 	}
 	
 	public static Settings parse(String... params) throws RayTracingParseException {
-		if (params.length != 6) {
+		if (params.length < 5) {
 			throw new RayTracingParseException("Wrong number of parameters");
 		}
 		Color backgroundColor;
@@ -30,7 +30,12 @@ public class Settings {
 			backgroundColor = ColorParser.parseColor(params[0], params[1], params[2]);
 			shadowRaysCount = Integer.parseInt(params[3]);
 			maxRecursionLevel = Integer.parseInt(params[4]);
-			superSamplingLevel = Integer.parseInt(params[5]);
+			if (params.length == 6) {
+				superSamplingLevel = Integer.parseInt(params[5]);
+			} else {
+				superSamplingLevel = 1;
+			}
+			
 		} catch (NumberFormatException e) {
 			throw new RayTracingParseException(e);
 		}

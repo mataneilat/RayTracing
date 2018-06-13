@@ -5,35 +5,30 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class Sphere implements Primitive {
+public class Sphere implements PrimitiveLogic {
 	
 	private final Vector center;
 	
 	private final double radius;
-	
-	private final int materialIndex;
 
-	private Sphere(Vector center, double radius, int materialIndex) {
+	private Sphere(Vector center, double radius) {
 		this.center = center;
 		this.radius = radius;
-		this.materialIndex = materialIndex;
 	}
 	
 	public static Sphere parse(String... params) throws RayTracingParseException {
-		if (params.length != 5) {
+		if (params.length < 4) {
 			throw new RayTracingParseException("Wrong number of parameters");
 		}
 		Vector center;
 		double radius;
-		int materialIndex;
 		try {
 			center = Vector.parse(params[0], params[1], params[2]);
 			radius = Double.parseDouble(params[3]);
-			materialIndex = Integer.parseInt(params[4]);
 		} catch (NumberFormatException e) {
 			throw new RayTracingParseException(e);
 		}
-		return new Sphere(center, radius, materialIndex);
+		return new Sphere(center, radius);
 	}
 
 	public Vector getCenter() {
@@ -42,10 +37,6 @@ public class Sphere implements Primitive {
 
 	public double getRadius() {
 		return radius;
-	}
-
-	public int getMaterialIndex() {
-		return materialIndex;
 	}
 
 	@Override

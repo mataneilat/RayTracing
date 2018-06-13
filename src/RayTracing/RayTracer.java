@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+
+import RayTracing.PrimitiveFactory.PrimitiveType;
  
 /**
  *  Main class for ray tracing exercise.
@@ -36,17 +38,13 @@ public class RayTracer {
             tracer.imageWidth = 500;
             tracer.imageHeight = 500;
  
-//            if (args.length < 2)
-//                throw new RayTracerException("Not enough arguments provided. Please specify an input scene file and an output image file for rendering.");
-// 
-           // String sceneFileName = args[0];
-           // String outputFileName = args[1];
+            if (args.length < 2)
+                throw new RayTracerException("Not enough arguments provided. Please specify an input scene file and an output image file for rendering.");
  
-            String sceneFileName = "/tmp/scenes2017/Triangle.txt";
-            String outputFileName = "/tmp/ray_out.png";
-            
-            if (args.length > 3)
-            {
+            String sceneFileName = args[0];
+            String outputFileName = args[1];
+
+            if (args.length > 3) {
                 tracer.imageWidth = Integer.parseInt(args[2]);
                 tracer.imageHeight = Integer.parseInt(args[3]);
             }
@@ -86,6 +84,7 @@ public class RayTracer {
         List<Material> materials = new ArrayList<Material>();
         List<Primitive> primitives = new ArrayList<Primitive>();
         
+        PrimitiveFactory primitiveFactory = new PrimitiveFactory();
         
         while ((line = r.readLine()) != null) {
             line = line.trim();
@@ -109,27 +108,33 @@ public class RayTracer {
                     materials.add(Material.parse(params));
                     System.out.println(String.format("Parsed material (line %d)", lineNum));
                 } else if (code.equals("sph")) {
-                    primitives.add(Sphere.parse(params));
+                    primitives.add(primitiveFactory.create(PrimitiveType.SPHERE, params));
                     System.out.println(String.format("Parsed sphere (line %d)", lineNum));
                 } else if (code.equals("pln")) {
-                    primitives.add(PlanePrimitive.parse(params));
+                	primitives.add(primitiveFactory.create(PrimitiveType.PLANE, params));
                     System.out.println(String.format("Parsed plane (line %d)", lineNum));
                 } else if (code.equals("trg")) {
-                	primitives.add(Triangle.parse(params));
+                	primitives.add(primitiveFactory.create(PrimitiveType.TRIANGLE, params));
+                } else if (code.equals("cdr")){
+                	primitives.add(primitiveFactory.create(PrimitiveType.CYLINDER, params));
+                } else if (code.equals("dsc")) {
+                	primitives.add(primitiveFactory.create(PrimitiveType.DISC, params));
                 } else if (code.equals("lgt")) {
                     lights.add(Light.parse(params));
                     System.out.println(String.format("Parsed light (line %d)", lineNum));
-                }
-                else {
+                } else {
+                	r.close();
                     throw new RayTracingParseException(String.format("ERROR: Did not recognize object: %s (line %d)", code, lineNum));
                 }
             }
         }
  
         if (camera == null || settings == null || materials.isEmpty() || lights.isEmpty() || primitives.isEmpty()) {
+        	r.close();
         	throw new RayTracingParseException("Did not parse all of the required scene parameters");
         }
         System.out.println("Finished parsing scene file " + sceneFileName);
+        r.close();
         return new Scene(camera, settings, materials, lights, primitives);
     }
  
@@ -144,33 +149,18 @@ public class RayTracer {
         // Create a byte array to hold the pixel data:
         byte[] rgbData = new byte[this.imageWidth * this.imageHeight * 3];
  
-        scene.getCamera().setImageContext(imageWidth, imageHeight);
+        scene.setImageContext(imageWidth, imageHeight);
         
         for (int i = 0; i < imageWidth; i++) {
         	for (int j = 0; j < imageHeight; j++) {
         		
-        		List<Ray> rays = scene.getCamera().constructRayThroughPixel(i, j);
-        		Color pixelColor = Color.BLACK;
-        		for (Ray ray : rays) {
-        			Color tracedColor = scene.calculateColor(ray);
-        			pixelColor = ColorUtils.add(pixelColor, ColorUtils.multiplyComponents(tracedColor, 1.0f / (float) rays.size()));
-        		}
-        		
+        		Color pixelColor = scene.calculateColorForPixel(i, j);
         		
         		rgbData[(j * this.imageWidth + i) * 3] = (byte)(pixelColor.getRed() & 0xFF);
         		rgbData[(j * this.imageWidth + i) * 3 + 1] = (byte)(pixelColor.getGreen() & 0xFF);
         		rgbData[(j * this.imageWidth + i) * 3 + 2] = (byte)(pixelColor.getBlue() & 0xFF);
         	}
-        }
-                // Put your ray tracing code here!
-                //
-                // Write pixel color values in RGB format to rgbData:
-                // Pixel [x, y] red component is in rgbData[(y * this.imageWidth + x) * 3]
-                //            green component is in rgbData[(y * this.imageWidth + x) * 3 + 1]
-                //             blue component is in rgbData[(y * this.imageWidth + x) * 3 + 2]
-                //
-                // Each of the red, green and blue components should be a byte, i.e. 0-255
- 
+        } 
  
         long endTime = System.currentTimeMillis();
         Long renderTime = endTime - startTime;

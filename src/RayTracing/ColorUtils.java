@@ -17,13 +17,6 @@ public class ColorUtils {
 		return new Color(r1 * r2, g1 * g2, b1 * b2);
 	}
 	
-	public static Color allComponentsColor(float a) {
-		if (a > 1 || a < 0) {
-			return null;
-		}
-		return new Color(a, a, a);
-	}
-	
 	public static float colorDifference(Color c1, Color c2) {
 		return Math.abs(c1.getRed() - c2.getRed()) + 
 				Math.abs(c1.getBlue() - c2.getBlue() +
@@ -34,9 +27,9 @@ public class ColorUtils {
 		if (a > 1 || a < 0) {
 			return null;
 		}
-		float r = c.getRed() / 255.0f;
-		float g = c.getGreen() / 255.0f;
-		float b = c.getBlue() / 255.0f;
+		float r = (float)c.getRed() / 255.0f;
+		float g = (float)c.getGreen() / 255.0f;
+		float b = (float)c.getBlue() / 255.0f;
 
 		return new Color(a*r, a*g, a*b);
 	}
