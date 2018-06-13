@@ -13,31 +13,37 @@ public class Cylinder implements PrimitiveLogic {
 	private final double radius;
 	
 	private final double yLength;
+	
+	private final boolean isClosed;
 
-	public Cylinder(Rotation rotation, Translation translation, double radius, double yLength) {
+	public Cylinder(Rotation rotation, Translation translation, double radius, 
+			double yLength, boolean isClosed) {
 		this.rotation = rotation;
 		this.translation = translation;
 		this.radius = radius;
 		this.yLength = yLength;
+		this.isClosed = isClosed;
 	}
 	
 	public static Cylinder parse(String... params) throws RayTracingParseException {
-		if (params.length < 9) {
+		if (params.length < 10) {
 			throw new RayTracingParseException("Wrong number of parameters");
 		}
 		Rotation rotation;
 		Translation translation;
 		double radius;
 		double yLength;
+		boolean isClosed;
 		try {
 			rotation = Rotation.parse(params[0], params[1], params[2], params[3]);
 			translation = Translation.parse(params[4], params[5], params[6]);
 			radius = Double.parseDouble(params[7]);
 			yLength = Double.parseDouble(params[8]);
+			isClosed = Boolean.parseBoolean(params[9]);
 		} catch (NumberFormatException e) {
 			throw new RayTracingParseException(e);
 		}
-		return new Cylinder(rotation, translation, radius, yLength);
+		return new Cylinder(rotation, translation, radius, yLength, isClosed);
 	}
 
 	@Override
@@ -83,20 +89,21 @@ public class Cylinder implements PrimitiveLogic {
 			}
 		}
 
-		
-		// Caps intersection
-		Disc topCap = new Disc(Rotation.noRotation(), new Translation(new Vector(0, yLength, 0)), 
-				radius);
-		Disc bottomCap = new Disc(Rotation.noRotation(), new Translation(new Vector(0, -yLength, 0)), 
-				radius);
-		
-		List<Double> topCapIntersections = topCap.intersect(transformedRay);
-		if (topCapIntersections != null) {
-			retVal.addAll(topCapIntersections);
-		}
-		List<Double> bottomCapIntersections = bottomCap.intersect(transformedRay);
-		if (bottomCapIntersections != null) {
-			retVal.addAll(bottomCapIntersections);
+		if (isClosed) {
+			// Caps intersection
+			Disc topCap = new Disc(Rotation.noRotation(), new Translation(new Vector(0, yLength, 0)), 
+					radius);
+			Disc bottomCap = new Disc(Rotation.noRotation(), new Translation(new Vector(0, -yLength, 0)), 
+					radius);
+			
+			List<Double> topCapIntersections = topCap.intersect(transformedRay);
+			if (topCapIntersections != null) {
+				retVal.addAll(topCapIntersections);
+			}
+			List<Double> bottomCapIntersections = bottomCap.intersect(transformedRay);
+			if (bottomCapIntersections != null) {
+				retVal.addAll(bottomCapIntersections);
+			}
 		}
 		
 		return retVal;
@@ -112,10 +119,13 @@ public class Cylinder implements PrimitiveLogic {
 		
 		Vector transformedPoint = inverseTransformationMatrix.homogeneousMultiply(p);
 		
-		if (Utils.approximatelyEquals(transformedPoint.getY(), yLength) || 
-				Utils.approximatelyEquals(transformedPoint.getY(), -yLength)) {
-			return transformationMatrix.homogeneousMultiply(new Vector(0, 1, 0)).normalize();
+		if (isClosed) {
+			if (Utils.approximatelyEquals(transformedPoint.getY(), yLength) || 
+					Utils.approximatelyEquals(transformedPoint.getY(), -yLength)) {
+				return transformationMatrix.homogeneousMultiply(new Vector(0, 1, 0)).normalize();
+			}
 		}
+		
 		Vector circleCenter = new Vector(0,0, transformedPoint.getY());
 		return transformationMatrix.homogeneousMultiply(p.sub(circleCenter).normalize()).normalize();
 	}

@@ -56,10 +56,8 @@ public class RayTracer {
             // Render scene:
             tracer.renderScene(scene, outputFileName);
  
-//      } catch (IOException e) {
-//          System.out.println(e.getMessage());
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
  
  
@@ -115,10 +113,13 @@ public class RayTracer {
                     System.out.println(String.format("Parsed plane (line %d)", lineNum));
                 } else if (code.equals("trg")) {
                 	primitives.add(primitiveFactory.create(PrimitiveType.TRIANGLE, params));
+                	System.out.println(String.format("Parsed triangle (line %d)", lineNum));
                 } else if (code.equals("cdr")){
                 	primitives.add(primitiveFactory.create(PrimitiveType.CYLINDER, params));
+                	System.out.println(String.format("Parsed cylinder (line %d)", lineNum));
                 } else if (code.equals("dsc")) {
                 	primitives.add(primitiveFactory.create(PrimitiveType.DISC, params));
+                	System.out.println(String.format("Parsed disc (line %d)", lineNum));
                 } else if (code.equals("lgt")) {
                     lights.add(Light.parse(params));
                     System.out.println(String.format("Parsed light (line %d)", lineNum));

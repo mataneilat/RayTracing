@@ -19,7 +19,7 @@ public class Rotation implements AffineTransformation<Rotation> {
 		double angle;
 		try {
 			aboutAxis = Vector.parse(params[0], params[1], params[2]);
-			angle = Double.parseDouble(params[3]);
+			angle = Double.parseDouble(params[3]) * Math.PI;
 		} catch (NumberFormatException e) {
 			throw new RayTracingParseException(e);
 		}
